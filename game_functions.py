@@ -1,6 +1,6 @@
-#Paul Lindberg
-#Assignment #4 Pacman
-#Friday 9AM
+# Paul Lindberg
+# Assignment 4 Pacman
+# Friday 9AM
 
 import sys
 import pygame
@@ -11,21 +11,13 @@ from dots import Power
 from node import Node
 
 
-def write_score(score):
-    f = open('scores.txt', "a")
-    score = str(score.value)
-    f.write(score + '\n')
-    f.close()
-
-
-def check_events(pacman, dots, blocks, powers, score, settings, screen, nodes):
+def check_events(pacman, dots, blocks, powers, score, settings, screen, nodes, portal):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            write_score(score)
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event, pacman)
-    check_colissions(pacman, dots, blocks, powers, score, settings, screen, nodes)
+            check_keydown_events(event, pacman, portal)
+    check_colissions(pacman, dots, blocks, powers, score, settings, screen, nodes, portal)
 
 
 def dot_sound(settings):
@@ -48,10 +40,38 @@ def collide_func(pacman, blocks):
     return False
 
 
-def check_colissions(pacman, dots, blocks, powers, score, settings, screen, nodes):
+def check_colissions(pacman, dots, blocks, powers, score, settings, screen, nodes, portal):
     block_collide = pygame.sprite.spritecollide(pacman, blocks, False)
     points = pygame.sprite.spritecollide(pacman, dots, True)
     pygame.sprite.spritecollide(pacman, powers, True)
+    portal_space = pygame.sprite.spritecollide(portal, blocks, False)
+
+    if pacman.rect.centerx == portal.blue_rect.centerx and pacman.rect.centery == portal.blue_rect.centery and portal.orange_active\
+            and not portal.tele:
+        localx = portal.orange_rect.centerx
+        localy = portal.orange_rect.centery
+        int(localx)
+        int(localy)
+        pacman.rect.centerx = localx
+        pacman.rect.centery = localy
+        portal.tele = True
+        portal.ticks = pygame.time.get_ticks()
+    if pacman.rect.centerx == portal.orange_rect.centerx and pacman.rect.centery == portal.orange_rect.centery and portal.blue_active\
+            and not portal.tele:
+        localx = portal.blue_rect.centerx
+        localy = portal.blue_rect.centery
+        int(localx)
+        int(localy)
+        pacman.rect.centerx = localx
+        pacman.rect.centery = localy
+        portal.tele = True
+        portal.ticks = pygame.time.get_ticks()
+
+    if portal_space:
+        portal.portal_viable = False
+    elif not portal_space:
+        portal.portal_viable = True
+
     if block_collide:
         pacman.rect.x = pacman.last_x
         pacman.rect.y = pacman.last_y
@@ -127,7 +147,7 @@ def reset_level(pacman, settings, dots, powers, screen):
             divx += settings.block_width
 
 
-def check_keydown_events(event, pacman):
+def check_keydown_events(event, pacman, portal):
     if event.key == pygame.K_RIGHT:
         if pacman.MOVINGUP or pacman.MOVINGDOWN:
             pacman.intent = 'right'
@@ -152,9 +172,13 @@ def check_keydown_events(event, pacman):
         else:
             pacman.MOVINGUP = False
             pacman.MOVINGDOWN = True
+    elif event.key == pygame.K_q:
+        portal.blue_portal()
+    elif event.key == pygame.K_e:
+        portal.orange_portal()
 
 
-def update_screen(blocks, dots, pacman, screen, settings, powers, score):
+def update_screen(blocks, dots, pacman, screen, settings, powers, score, portal):
     screen.fill(settings.BLACK)
 
     for block in blocks.sprites():
@@ -165,6 +189,7 @@ def update_screen(blocks, dots, pacman, screen, settings, powers, score):
     for power in powers.sprites():
         power.draw_dot()
     score.blitme()
+    portal.draw()
     pygame.display.flip()
     if settings.first_run:
         pygame.time.wait(4500)

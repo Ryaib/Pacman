@@ -1,6 +1,7 @@
-#Paul Lindberg
-#Assignment #4 Pacman
-#Friday 9AM
+# Paul Lindberg
+# Assignment 4 Pacman
+# Friday 9AM
+
 
 import pygame
 from settings import Settings
@@ -10,17 +11,7 @@ from Pacman import Pacman
 from Score import Score
 import sys
 from Ghost import Ghost
-
-
-def open_file(settings):
-    f = open('scores.txt', "r")
-    data = f.readlines()
-    for x in data:
-        settings.num_scores += 1
-        print(x)
-    f.close()
-
-    return data
+from Portal import Portal
 
 
 def run_game():
@@ -34,13 +25,13 @@ def run_game():
     powers = Group()
     nodes = Group()
     pacman = Pacman(settings, screen)
+    portal = Portal(screen)
     score = Score(settings, screen)
     menupac = Pacman(settings, screen)
     blinky = Ghost(screen, 'Blinky', (150, 200), settings)
     inky = Ghost(screen, 'Inky', (150, 250), settings)
     pinky = Ghost(screen, 'Pinky', (150, 300), settings)
     clyde = Ghost(screen, 'Clyde', (150, 350), settings)
-    listed = open_file(settings)
     title = settings.title
 
     while not settings.GAME_ACTIVE:
@@ -71,21 +62,15 @@ def run_game():
         screen.blit(title, (0, 0))
         textsurface = settings.myfont.render("HIGH SCORES", False, (255, 255, 255))
         screen.blit(textsurface, (350, 100))
-        y = 150
-        for x in listed:
-            if y > 550:
-                break
-            textsurface = settings.myfont.render(x, False, (255, 255, 255))
-            screen.blit(textsurface, (450, y))
-            y += 50
         pygame.display.flip()
 
     gf.create_maze(settings, blocks, screen, dots, pacman, powers, nodes)
 
     while True:
         pacman.update()
-        gf.check_events(pacman, dots, blocks, powers, score, settings, screen, nodes)
-        gf.update_screen(blocks, dots, pacman, screen, settings, powers, score)
+        portal.update(pacman)
+        gf.check_events(pacman, dots, blocks, powers, score, settings, screen, nodes, portal)
+        gf.update_screen(blocks, dots, pacman, screen, settings, powers, score, portal)
 
 
 run_game()

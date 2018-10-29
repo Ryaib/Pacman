@@ -34,7 +34,7 @@ class Pacman(Sprite):
         self.last_y = self.rect.y
 
         current = pygame.time.get_ticks()
-        if current - self.move_tick > 1:
+        if current - self.move_tick > 8:
             self.move_tick = current
             if self.MOVINGLEFT:
                 self.rect.x -= 1

@@ -1,6 +1,6 @@
-#Paul Lindberg
-#Assignment #4 Pacman
-#Friday 9AM
+# Paul Lindberg
+# Assignment 4 Pacman
+# Friday 9AM
 
 from pygame.sprite import Sprite
 import pygame
